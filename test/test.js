@@ -4,8 +4,6 @@ var expect = require('chai').expect;
 
 let biTidProtocol = require('../index')
 
-
-
 let timeBase = new Date('01/01/2013').getTime()
 let timeNow = Math.floor((new Date().getTime() - timeBase) / 1000)
 let timeBuf = Buffer.alloc(4)
@@ -15,26 +13,24 @@ timeBuf.writeUInt32LE(timeNow)
 describe('...', function () {
     describe('Hello from Device', function () {
         it('Expect Hello Response to send to Device', async function () {
-
-            let serialNumber = Buffer.alloc(4)
-            serialNumber.writeUInt32LE(65534)
             let helloToDevice = {
                 sync1: Buffer.from([0x02]), //1 bytes
                 sync2: Buffer.from([0x55]), //1 bytes
                 msgType: Buffer.from([0x00]), //1 bytes
                 payloadLen: Buffer.from([0x31, 0x00]), //2 bytes Little Endian
-                serialNumber: Buffer.from(serialNumber), //4 bytes Little Endian
-                modemIMEI: Buffer.from([0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61]),  //16 bytes ascii
-                simSerial: Buffer.from([0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62]), //21 bytes ascii
-                productId: Buffer.from([0x01]), //1 byte
+                serialNumber: Buffer.from([0xf2, 0xd4, 0x08, 0x00]), //4 bytes Little Endian
+                modemIMEI: Buffer.from([0x38, 0x36, 0x36, 0x35, 0x36, 0x37, 0x30, 0x36, 0x37, 0x35, 0x34, 0x35, 0x37, 0x35, 0x37, 0x00]),  //16 bytes ascii
+                simSerial: Buffer.from([0x38, 0x39, 0x33, 0x32, 0x30, 0x34, 0x31, 0x30, 0x30, 0x33, 0x30, 0x30, 0x30, 0x31, 0x37, 0x37, 0x35, 0x39, 0x32, 0x30, 0x00]), //21 bytes ascii
+                productId: Buffer.from([0x5d]), //1 byte
                 hardwareRevisionNumber: Buffer.from([0x01]), //1 byte
                 firmwareMajor: Buffer.from([0x01]), //1 byte
-                firmwareMinor: Buffer.from([0x01]), //1 byte
+                firmwareMinor: Buffer.from([0x0a]), //1 byte
                 flags: Buffer.from([0x00, 0x00, 0x00, 0x00]), //4 bytes Little Endian
             }
             let finalBuf = Buffer.concat(Object.values(helloToDevice))
 
             response = await biTidProtocol.processData(finalBuf)
+            console.log(response)
             expect(response).to.have.property('responseToDevice')
             expect(response).to.have.property('values')
         });
