@@ -1,6 +1,7 @@
+let protocolDecoder = require('./lib/protocol.js')
+
 exports.processData = async function (buf) {
-    let PROTOCOL = require('./lib/protocol.js')
-    let driver = new PROTOCOL()
+    let driver = new protocolDecoder();
 
     let data = buf
 
@@ -134,8 +135,7 @@ exports.processData = async function (buf) {
 }
 
 exports.processTime = async function (digitalMattersTS) {
-    let PROTOCOL = require('./lib/protocol.js')
-    let driver = new PROTOCOL()
+    let driver = new protocolDecoder();
 
     try {
         let dmDate = await driver.processTime(digitalMattersTS)
