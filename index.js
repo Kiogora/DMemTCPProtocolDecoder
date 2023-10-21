@@ -1,7 +1,7 @@
-let protocolDecoder = require('./lib/protocol.js')
+let protocolDecoderClass = require('./lib/protocol.js')
 
 exports.processData = async function (buf) {
-    let driver = new protocolDecoder();
+    let protocolDecoder = new protocolDecoderClass();
 
     let data = buf
 
@@ -42,10 +42,10 @@ exports.processData = async function (buf) {
     response.data = data
     response.arrBufAllData = []
     try {
-        response = await driver.splitRawData(response)
+        response = await protocolDecoder.splitRawData(response)
         for (let i = 0; i < response.arrBufRawData.length; i++) {
             response.message = response.arrBufRawData[i]
-            response = await driver.processMessages(response)
+            response = await protocolDecoder.processMessages(response)
         }
 
 
@@ -127,22 +127,20 @@ exports.processData = async function (buf) {
             response.arrShapedData = arrShapedData
         }
     } catch (e) {
-        console.error('digitalMattersFalcon2GDriver processData Error', e);
+        console.error('digitalMattersG702GDecoder processData Error', e);
         throw new Error(e);
     }
-
     return response;
 }
 
 exports.processTime = async function (digitalMattersTS) {
-    let driver = new protocolDecoder();
+    let protocolDecoder = new protocolDecoderClass();
 
     try {
-        let dmDate = await driver.processTime(digitalMattersTS)
+        let dmDate = await protocolDecoder.processTime(digitalMattersTS)
     } catch (e) {
-        console.error('digitalMattersFalcon2GDriver processTime Error', e)
+        console.error('digitalMattersG702GDecoder processTime Error', e)
         throw new Error(e);
     }
-
     return dmDate
 }
