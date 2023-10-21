@@ -135,9 +135,10 @@ exports.processData = async function (buf) {
 
 exports.processTime = async function (digitalMattersTS) {
     let protocolDecoder = new protocolDecoderClass();
+    let dmDate;
 
     try {
-        let dmDate = await protocolDecoder.processTime(digitalMattersTS)
+        dmDate = await protocolDecoder.processTime(digitalMattersTS)
     } catch (e) {
         console.error('digitalMattersG702GDecoder processTime Error', e)
         throw new Error(e);
