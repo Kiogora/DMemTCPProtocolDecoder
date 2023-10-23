@@ -12,7 +12,7 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
             protocolDecoder = socketDataList[index].socketProtocolDecoder;
         } else {
             /*Step 3 - If not present, add this socket and a new decoder object to protocolDataList and start using the decoder*/
-            socketDataList.push({socket:thisSocket, socketProtocolDecoder: new protocolDecoderClass()})
+            socketDatalist.push({socket:thisSocket, socketProtocolDecoder: new protocolDecoderClass()})
             index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
             protocolDecoder = socketDataList[index].socketProtocolDecoder;   
         }
