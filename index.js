@@ -1,21 +1,13 @@
 let protocolDecoderClass = require('./lib/protocol.js')
 
 exports.processData = async function (buf, thisSocket, socketDataList) {
-    let protocolDecoder;
-    if(typeof thisSocket === 'undefined' || typeof socketDataList === 'undefined'){
-        protocolDecoder = new protocolDecoderClass();
-    } else {
-        /*Step 1 - Check if this socket exists in socketDataList*/
-        let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
-        /*Step 2 - If present, continue using already present protocolDecoderObject for a message stream in progress*/
-        if (index !== -1) {
-            protocolDecoder = socketDataList[index].socketProtocolDecoder;
-        } else {
-            /*Step 3 - If not present, add this socket and a new decoder object to protocolDataList and start using the decoder*/
-            socketDataList.push({socket:thisSocket, socketProtocolDecoder: new protocolDecoderClass()})
-            index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
-            protocolDecoder = socketDataList[index].socketProtocolDecoder;   
-        }
+    let protocolDecoder = new protocolDecoderClass();
+    /*Step 1 - Check if this socket exists in socketDataList*/
+    let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+    /*Step 2 - If not present, persist rtuId and all message data*/
+    if (index === -1) {
+        socketDataList[index].rtuId = -1; 
+        socketDataList[index].arrShapedData = []
     }
 
     let data = buf
@@ -37,61 +29,53 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
             response.message = response.arrBufRawData[i]
             response = await protocolDecoder.processMessages(response)
         }
-
-        let arrShapedData = []
         if(response.arrBufAllData?.length > 0){
             response.arrBufAllData.map((async allData => {
-                let shapedData = {
-                    values: {}
-                }
-
-                shapedData.values.TxFlag = allData.messageDetails.logReason
-                shapedData.values.time = allData.messageDetails.deviceTime
-                shapedData.values.sequenceNumber = allData.messageDetails.sequenceNumber
+                let shapedData = {}
+                shapedData.TxFlag = allData.messageDetails.logReason
+                shapedData.time = allData.messageDetails.deviceTime
+                shapedData.time = processTime(shapedData.time)
+                shapedData.sequenceNumber = allData.messageDetails.sequenceNumber
     
                 allData.arrFields.map(async field => {
                     switch (field.fId) {
                         case (0): 
                             //GPS Data
-                            let gpsData = {
-                                gpsUTCDateTime: field.fIdData.readUInt32LE(0),
-                                latitude: field.fIdData.readInt32LE(4) / 10000000,   //155614102128
-                                longitude: field.fIdData.readInt32LE(8) / 10000000,
-                                altitude: field.fIdData.readInt16LE(12),
-                                groundSpeed2D: field.fIdData.readUInt16LE(14),
-                                speedAccuracyEstimate: field.fIdData.readUInt8(16),
-                                heading2d: field.fIdData.readUInt8(17),
-                                PDOP: field.fIdData.readUInt8(18),
-                                positionAccuracyEstimate: field.fIdData.readUInt8(19),
-                                gpsStatusFlags: field.fIdData.readUInt8(20),
-                            }
-                            // gpsData.gpsUTCDateTime = await processData(gpsData.gpsUTCDateTime)
-                            gpsData.gpsUTCDateTime = new Date()
-                            shapedData.values.gpsData = gpsData
+                            shapedData.gpsUTCDateTime = field.fIdData.readUInt32LE(0)
+                            shapedData.gpsUTCDateTime = processTime(shapedData.gpsUTCDateTime)
+                            shapedData.latitude = field.fIdData.readInt32LE(4) / 10000000,   //155614102128
+                            shapedData.longitude = field.fIdData.readInt32LE(8) / 10000000,
+                            shapedData.altitude = field.fIdData.readInt16LE(12)
+                            shapedData.groundSpeed2D = field.fIdData.readUInt16LE(14)
+                            shapedData.speedAccuracyEstimate = field.fIdData.readUInt8(16)
+                            shapedData.heading2d = field.fIdData.readUInt8(17)
+                            shapedData.PDOP = field.fIdData.readUInt8(18)
+                            shapedData.positionAccuracyEstimate = field.fIdData.readUInt8(19)
+                            shapedData.gpsStatusFlags = field.fIdData.readUInt8(20)
                             break
                         case (2):
                             //Digital Data
-                            shapedData.values.digitalsIn = field.fIdData.readUInt32LE(0) //4 bytes
-                            shapedData.values.digitalsOut = field.fIdData.readInt16LE(4) //2 bytes
-                            shapedData.values.CI8 = field.fIdData.readInt16LE(6) //2 bytes
+                            shapedData.digitalsIn = field.fIdData.readUInt32LE(0) //4 bytes
+                            shapedData.digitalsOut = field.fIdData.readInt16LE(4) //2 bytes
+                            shapedData.CI8 = field.fIdData.readInt16LE(6) //2 bytes
                             break
                         case (6):
-                            //Ananlog Data 16bit
+                            //Analog Data 16bit
                             for (let i = 0; i < field.fIdData.length; i++) {
                                 if(field.fIdData[i] === 1){
-                                    shapedData.values.BATT = field.fIdData.readInt16LE(i + 1) / 1000
+                                    shapedData.BatteryVoltage = field.fIdData.readInt16LE(i + 1) / 1000
                                 }
                                 if(field.fIdData[i] === 2){
-                                    shapedData.values.ExternalVoltage = (field.fIdData.readInt16LE(i + 1) / 1000) / 10
+                                    shapedData.ExternalVoltage = (field.fIdData.readInt16LE(i + 1) / 10) / 10
                                 }
                                 if(field.fIdData[i] === 3){
-                                    shapedData.values.InternalTemperature = field.fIdData.readInt16LE(i + 1) / 100
+                                    shapedData.InternalTemperature = field.fIdData.readInt16LE(i + 1) / 100
                                 }
                                 if(field.fIdData[i] === 4){
-                                    shapedData.values.SIG = field.fIdData.readInt16LE(i + 1)
+                                    shapedData.cellularSignaldBm = field.fIdData.readInt16LE(i + 1)
                                 }
                                 if (field.fIdData.readUInt8(i) > 4) {
-                                    shapedData.values[`AI${field.fIdData[i]}`] = field.fIdData.readInt16LE(i + 1)
+                                    shapedData[`AI${field.fIdData[i]}`] = field.fIdData.readInt16LE(i + 1)
                                 }
                                 i += 2
                             }
@@ -100,7 +84,7 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
                             //Ananlog Data 32bit
                             for (let i = 0; i < field.fIdData.length; i++) {
                                 try{
-                                    shapedData.values[`AI${field.fIdData[i]}`] = field.fIdData.readInt32LE(i + 1)
+                                    shapedData[`AI${field.fIdData[i]}`] = field.fIdData.readInt32LE(i + 1)
                                 }catch(e){
                                     console.error(`Analog Data 32 bit error for field.fIdData[i] ${field.fIdData[i]}`, e)
                                 }
