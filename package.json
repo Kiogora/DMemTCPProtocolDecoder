@@ -1,13 +1,15 @@
 {
-  "name": "@bitid/digitalmatterslibrary",
+  "name": "DMemTCPProtocol",
   "version": "2.0.1",
-  "description": "A library to process tcp messages from DigitalMatters Devices",
+  "description": "A library to process tcp messages from DigitalMatter Devices",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "keywords": [
-    "DigitalMatters",
+    "DigitalMatter",
+    "TCP",
+    "GPS",
     "protocol"
   ],
   "author": "Shane Bowyer",
