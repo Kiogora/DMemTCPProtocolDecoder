@@ -1,6 +1,6 @@
 let protocolDecoderClass = require('./lib/protocol.js')
 
-exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: 0, arrShapedData : []}]) {
+exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: -1, arrShapedData : []}]) {
     let protocolDecoder = new protocolDecoderClass();
     let index = 0;
     let timeBase = new Date('01/01/2013').getTime()
@@ -32,7 +32,7 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
         response = await protocolDecoder.splitRawData(response)
         for (let i = 0; i < response.arrBufRawData.length; i++) {
             response.message = response.arrBufRawData[i]
-            response = await protocolDecoder.processMessages(response)
+            response = await protocolDecoder.processMessages(response, socketDataList[index])
         }
         if(response.arrBufAllData?.length > 0){
             response.arrBufAllData.map(async allData => {  
