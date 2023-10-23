@@ -30,7 +30,6 @@ describe('...', function () {
             let finalBuf = Buffer.concat(Object.values(helloToDevice))
 
             response = await biTidProtocol.processData(finalBuf)
-            console.log(response)
             expect(response).to.have.property('responseToDevice')
         })
 
@@ -40,7 +39,6 @@ describe('...', function () {
                 response = await biTidProtocol.processData(Buffer.from("0255043d003d000403000018be53140b00156daf531475123bff5d2cea151a070000022a0b050302080a00000000001600060f01f80f020c0503b906041f00090000", "hex"))
                 expect(response).to.not.have.property('responseToDevice')
                 expect(response).to.have.property('arrBufAllData')
-                console.log(response.arrShapedData[0].values);
             })
         })
 
@@ -70,16 +68,14 @@ describe('...', function () {
                 expect(response).to.not.have.property('responseToDevice')
                 expect(response).to.have.property('arrBufAllData')
                 expect(response.arrBufAllData[0]).to.have.property('arrFields')
-                expect(response.arrShapedData[0]).to.have.property('values')
-                expect(response.arrShapedData[0].values).to.have.property('gpsData')
-                expect(response.arrShapedData[0].values.InternalTemperature).to.equal(22.39)
-                expect(response.arrShapedData[0].values.ExternalVoltage).to.equal(0.003)
-                expect(response.arrShapedData[0].values.AI17).to.equal(65793)
-                expect(response.arrShapedData[0].values.AI18).to.equal(1)
-                expect(response.arrShapedData[0].values.BATT).to.equal(4.094)
-                expect(response.arrShapedData[0].values.SIG).to.equal(29)
-                expect(response.arrShapedData[0].values.TxFlag).to.equal(11)
-                console.log(response);
+                expect(response.arrShapedData[0]).to.have.property('gpsUTCDateTime')
+                expect(response.arrShapedData[0].InternalTemperature).to.equal(22.39)
+                expect(response.arrShapedData[0].ExternalVoltage).to.equal(0.3)
+                expect(response.arrShapedData[0].AI17).to.equal(65793)
+                expect(response.arrShapedData[0].AI18).to.equal(1)
+                expect(response.arrShapedData[0].BatteryVoltage).to.equal(4.094)
+                expect(response.arrShapedData[0].cellularSignaldBm).to.equal(29)
+                expect(response.arrShapedData[0].TxFlag).to.equal(11)
             })
         })
 
@@ -139,17 +135,16 @@ describe('...', function () {
                 let buf18 = Buffer.from([0x12, 0x21, 0x03, 0x02, 0x08, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x12, 0x01, 0x34, 0x0e, 0x03, 0x43])
                 let buf19 = Buffer.from([0x06, 0x04, 0x18, 0x00, 0x05, 0xf4, 0x0d, 0x06, 0x9a, 0x24, 0x07, 0x00, 0x00, 0x07, 0x0a, 0x11, 0xf5, 0x3e, 0x01, 0x00])
                 let buf20 = Buffer.from([0x12, 0x05, 0x00, 0x00, 0x00])
-                // Jun  8 03:48:26 mail telemetry[15385]: falconData size 5 <Buffer 02 55 05 00 00>
-                // Jun  8 03:48:26 mail telemetry[15385]: falcon i:0 <Buffer 02 55 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00>
 
                 let finalBuf = Buffer.concat([buf1,buf2,buf3,buf4,buf5,buf6,buf7,buf8,buf9,buf10,buf11,buf12,buf13,buf14,buf15,buf16,buf17,buf18,buf19,buf20])
                 
 
                 response = await biTidProtocol.processData(finalBuf)
-                expect(response.arrShapedData[0].values.sequenceNumber).to.equal(4432)
-                expect(response.arrShapedData[1].values.sequenceNumber).to.equal(4433)
-                expect(response.arrShapedData[2].values.sequenceNumber).to.equal(4434)
-                expect(response.arrShapedData[3].values.sequenceNumber).to.equal(4435)
+                //console.log(response);
+                expect(response.arrShapedData[0].sequenceNumber).to.equal(4432)
+                expect(response.arrShapedData[1].sequenceNumber).to.equal(4433)
+                expect(response.arrShapedData[2].sequenceNumber).to.equal(4434)
+                expect(response.arrShapedData[3].sequenceNumber).to.equal(4435)
 
                 // response.arrShapedData.map(a=> console.log(a.values.sequenceNumber))
             })

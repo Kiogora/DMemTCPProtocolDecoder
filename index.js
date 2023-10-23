@@ -1,20 +1,18 @@
 let protocolDecoderClass = require('./lib/protocol.js')
 
-exports.processData = async function (buf, thisSocket, socketDataList) {
+exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: 0, arrShapedData : []}]) {
     let protocolDecoder = new protocolDecoderClass();
+    let index = 0;
     
 
-    if(typeof thisSocket !== 'undefined' || typeof socketDataList !== 'undefined'){
+    if(typeof thisSocket !== 'undefined'){
         /*Step 1 - Check if this socket exists in socketDataList*/
-        let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+        index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
         /*Step 2 - If not present, persist rtuId and all message data*/
         if (index === -1) {
             socketDataList[index].rtuId = -1; 
             socketDataList[index].arrShapedData = []
         }
-    } else {
-        index = 0;
-        socketDataList = [{rtuId: 0, arrShapedData : []}]
     }
 
     let data = buf
@@ -37,13 +35,12 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
             response = await protocolDecoder.processMessages(response)
         }
         if(response.arrBufAllData?.length > 0){
-            response.arrBufAllData.map((async allData => {
-                let shapedData = {}
-                shapedData.TxFlag = allData.messageDetails.logReason
-                shapedData.time = allData.messageDetails.deviceTime
-                shapedData.time = processTime(shapedData.time)
-                shapedData.sequenceNumber = allData.messageDetails.sequenceNumber
-    
+            response.arrBufAllData.map(async allData => {
+                let shapedData = {};
+                shapedData["TxFlag"] = allData.messageDetails.logReason
+                shapedData["time"] = allData.messageDetails.deviceTime
+                //shapedData["time"] = processTime(shapedData.time)
+                shapedData["sequenceNumber"] = allData.messageDetails.sequenceNumber
                 allData.arrFields.map(async field => {
                     switch (field.fId) {
                         case (0): 
@@ -102,9 +99,10 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
                             console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId)
                     }
                 })
+                console.log(shapedData);
                 socketDataList[index].arrShapedData.push(shapedData)
-            }))
-            response.arrShapedData = socketDataList[index].arrShapedData
+            })
+            response.arrShapedData = [...socketDataList[index].arrShapedData]
         }
     } catch (e) {
         console.error('PayloadDecoderError - unhandled processData Error', e);
