@@ -2,9 +2,7 @@ let protocolDecoderClass = require('./lib/protocol.js')
 
 exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: 0, arrShapedData : []}]) {
     let protocolDecoder = new protocolDecoderClass();
-    let index = 0;
-    let shapedData = {};
-    
+    let index = 0;    
 
     if(typeof thisSocket !== 'undefined'){
         /*Step 1 - Check if this socket exists in socketDataList*/
@@ -37,7 +35,7 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
         }
         if(response.arrBufAllData?.length > 0){
             response.arrBufAllData.map(async allData => {  
-                shapedData = {}              
+                let shapedData = {};             
                 shapedData["TxFlag"] = allData.messageDetails.logReason
                 shapedData["time"] = Math.floor(await protocolDecoder.processTime(allData.messageDetails.rtcDateTime)/1000)
                 shapedData["sequenceNumber"] = allData.messageDetails.sequenceNumber
