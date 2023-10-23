@@ -1,4 +1,4 @@
-# Use this library to decode the tcp flexi-protocol data which Digital Matters devices send and receive.
+# Use this library to decode the tcp flexi-protocol data which Digital Matter devices send and receive.
 
 
 The device sends tcp packets with header bytes. These packets can be received contactinated onto each other. This library separates them and builds up an array
@@ -8,7 +8,8 @@ in the **response.values** object for ease of use. You can however ignore this o
 
 # To use call function .processData(<raw tcp Buffer data from the device>)
 eg: 
-`let response = await biTidProtocol.processData(<raw tcp Buffer data from the device>)`
+`const DMemTCPProtocolDecoder = require('DMemTCPProtocolDecoder'); `
+`let response = await DMemTCPProtocolDecoder.processData(<raw tcp Buffer data from the device>)`
 
 ## What you probably most interrested in is you get a nice neat object back with the DMT values:
 
@@ -41,7 +42,4 @@ This holds all the data split up accordingly.
 # allData.arrFields
 This holds the individual message data such as GPS location, digital inputs and analogs.
 
-# If you need more functionality from this library but don't want to code it up let us know and we will assist you. email shane@bitid.co.za
-
-
-More detail to be added to this readme soon....
+# Original credit for this library goes to: shane@bitid.co.za
