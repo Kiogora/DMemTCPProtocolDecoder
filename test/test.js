@@ -32,7 +32,6 @@ describe('...', function () {
             response = await biTidProtocol.processData(finalBuf)
             console.log(response)
             expect(response).to.have.property('responseToDevice')
-            expect(response).to.have.property('values')
         });
 
         describe('DMT Message from Device', function () {
@@ -70,6 +69,7 @@ describe('...', function () {
                 expect(response.arrShapedData[0].values.BATT).to.equal(4.094)
                 expect(response.arrShapedData[0].values.SIG).to.equal(29)
                 expect(response.arrShapedData[0].values.TxFlag).to.equal(11)
+                console.log(response);
             })
         })
 

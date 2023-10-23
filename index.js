@@ -23,7 +23,7 @@ exports.processData = async function (buf) {
                 let shapedData = {
                     values: {}
                 }
-                
+
                 shapedData.values.TxFlag = allData.messageDetails.logReason
                 shapedData.values.time = allData.messageDetails.deviceTime
                 shapedData.values.sequenceNumber = allData.messageDetails.sequenceNumber
@@ -85,6 +85,7 @@ exports.processData = async function (buf) {
                                 }
                                 i += 4
                             }
+                            break
                         default:
                             console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId)
                     }
