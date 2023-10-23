@@ -95,9 +95,9 @@ exports.processData = async function (buf, thisSocket, socketDataList) {
                             console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId)
                     }
                 })
-                arrShapedData.push(shapedData)
+                socketDataList[index].arrShapedData.push(shapedData)
             }))
-            response.arrShapedData = arrShapedData
+            response.arrShapedData = socketDataList[index].arrShapedData
         }
     } catch (e) {
         console.error('PayloadDecoderError - unhandled processData Error', e);
