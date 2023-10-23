@@ -2,12 +2,19 @@ let protocolDecoderClass = require('./lib/protocol.js')
 
 exports.processData = async function (buf, thisSocket, socketDataList) {
     let protocolDecoder = new protocolDecoderClass();
-    /*Step 1 - Check if this socket exists in socketDataList*/
-    let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
-    /*Step 2 - If not present, persist rtuId and all message data*/
-    if (index === -1) {
-        socketDataList[index].rtuId = -1; 
-        socketDataList[index].arrShapedData = []
+    
+
+    if(typeof thisSocket !== 'undefined' || typeof socketDataList !== 'undefined'){
+        /*Step 1 - Check if this socket exists in socketDataList*/
+        let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+        /*Step 2 - If not present, persist rtuId and all message data*/
+        if (index === -1) {
+            socketDataList[index].rtuId = -1; 
+            socketDataList[index].arrShapedData = []
+        }
+    } else {
+        index = 0;
+        socketDataList = [{rtuId: 0, arrShapedData : []}]
     }
 
     let data = buf
