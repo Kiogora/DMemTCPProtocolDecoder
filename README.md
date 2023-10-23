@@ -8,8 +8,10 @@ in the **response.values** object for ease of use. You can however ignore this o
 
 # To use call function .processData(<raw tcp Buffer data from the device>)
 eg: 
-`const DMemTCPProtocolDecoder = require('DMemTCPProtocolDecoder'); `
-`let response = await DMemTCPProtocolDecoder.processData(<raw tcp Buffer data from the device>)`
+```
+const DMemTCPProtocolDecoder = require('DMemTCPProtocolDecoder');
+let response = await DMemTCPProtocolDecoder.processData(<raw tcp Buffer data from the device>);
+```
 
 ## What you probably most interrested in is you get a nice neat object back with the DMT values:
 
