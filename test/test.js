@@ -37,6 +37,7 @@ describe('...', function () {
             it('Expect values in processed messages/s', async function () {
  
                 response = await biTidProtocol.processData(Buffer.from("0255043d003d000403000018be53140b00156daf531475123bff5d2cea151a070000022a0b050302080a00000000001600060f01f80f020c0503b906041f00090000", "hex"))
+                console.log(response)
                 expect(response).to.not.have.property('responseToDevice')
                 expect(response).to.have.property('arrBufAllData')
             })

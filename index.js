@@ -2,7 +2,8 @@ let protocolDecoderClass = require('./lib/protocol.js')
 
 exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: 0, arrShapedData : []}]) {
     let protocolDecoder = new protocolDecoderClass();
-    let index = 0;    
+    let index = 0;
+    let timeBase = new Date('01/01/2013').getTime()
 
     if(typeof thisSocket !== 'undefined'){
         /*Step 1 - Check if this socket exists in socketDataList*/
@@ -37,13 +38,13 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
             response.arrBufAllData.map(async allData => {  
                 let shapedData = {};             
                 shapedData["TxFlag"] = allData.messageDetails.logReason
-                shapedData["time"] = Math.floor(await protocolDecoder.processTime(allData.messageDetails.rtcDateTime)/1000)
+                shapedData["time"] = Math.floor((timeBase + (allData.messageDetails.rtcDateTime * 1000))/1000)
                 shapedData["sequenceNumber"] = allData.messageDetails.sequenceNumber
                 allData.arrFields.map(async field => {
                     switch (field.fId) {
                         case (0): 
                             //GPS Data
-                            shapedData.gpsUTCDateTime = Math.floor(await protocolDecoder.processTime(field.fIdData.readUInt32LE(0))/1000)
+                            shapedData.gpsUTCDateTime = Math.floor((timeBase + (field.fIdData.readUInt32LE(0) * 1000))/1000) 
                             shapedData.latitude = field.fIdData.readInt32LE(4) / 10000000,   //155614102128
                             shapedData.longitude = field.fIdData.readInt32LE(8) / 10000000,
                             shapedData.altitude = field.fIdData.readInt16LE(12)
@@ -97,10 +98,8 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                             break
                     }
                 })
-                //console.log(socketDataList[index])
                 socketDataList[index].arrShapedData.push({...shapedData})             
             })
-            console.log(socketDataList[index].arrShapedData)
             response.arrShapedData = socketDataList[index].arrShapedData
         }
     } catch (e) {
