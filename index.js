@@ -1,7 +1,18 @@
 let protocolDecoderClass = require('./lib/protocol.js')
 
-exports.processData = async function (buf) {
-    let protocolDecoder = new protocolDecoderClass();
+exports.processData = async function (socketDataList, thisSocket, buf) {
+    let protocolDecoder;
+    /*Step 1 - Check if this socket exists in socketDataList*/
+    let index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+    /*Step 2 - If present, continue using already present protocolDecoderObject for a message stream in progress*/
+    if (index !== -1) {
+        protocolDecoder = socketDataList[index].socketProtocolDecoder;
+    } else {
+        /*Step 3 - If not present, add this socket and a new decoder object to protocolDataList and start using the decoder*/
+        socketDatalist.push({socket:thisSocket, socketProtocolDecoder: new protocolDecoderClass()})
+        index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+        protocolDecoder = socketDataList[index].socketProtocolDecoder;   
+    }
 
     let data = buf
 
