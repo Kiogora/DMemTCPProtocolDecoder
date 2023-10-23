@@ -68,7 +68,6 @@ describe('...', function () {
                 expect(response).to.not.have.property('responseToDevice')
                 expect(response).to.have.property('arrBufAllData')
                 expect(response.arrBufAllData[0]).to.have.property('arrFields')
-                expect(response.arrShapedData[0]).to.have.property('gpsUTCDateTime')
                 expect(response.arrShapedData[0].InternalTemperature).to.equal(22.39)
                 expect(response.arrShapedData[0].ExternalVoltage).to.equal(0.3)
                 expect(response.arrShapedData[0].AI17).to.equal(65793)

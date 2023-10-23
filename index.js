@@ -3,6 +3,7 @@ let protocolDecoderClass = require('./lib/protocol.js')
 exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId: 0, arrShapedData : []}]) {
     let protocolDecoder = new protocolDecoderClass();
     let index = 0;
+    let shapedData = {};
     
 
     if(typeof thisSocket !== 'undefined'){
@@ -35,18 +36,16 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
             response = await protocolDecoder.processMessages(response)
         }
         if(response.arrBufAllData?.length > 0){
-            response.arrBufAllData.map(async allData => {
-                let shapedData = {};
+            response.arrBufAllData.map(async allData => {  
+                shapedData = {}              
                 shapedData["TxFlag"] = allData.messageDetails.logReason
-                shapedData["time"] = allData.messageDetails.deviceTime
-                //shapedData["time"] = processTime(shapedData.time)
+                shapedData["time"] = Math.floor(await protocolDecoder.processTime(allData.messageDetails.rtcDateTime)/1000)
                 shapedData["sequenceNumber"] = allData.messageDetails.sequenceNumber
                 allData.arrFields.map(async field => {
                     switch (field.fId) {
                         case (0): 
                             //GPS Data
-                            shapedData.gpsUTCDateTime = field.fIdData.readUInt32LE(0)
-                            shapedData.gpsUTCDateTime = processTime(shapedData.gpsUTCDateTime)
+                            shapedData.gpsUTCDateTime = Math.floor(await protocolDecoder.processTime(field.fIdData.readUInt32LE(0))/1000)
                             shapedData.latitude = field.fIdData.readInt32LE(4) / 10000000,   //155614102128
                             shapedData.longitude = field.fIdData.readInt32LE(8) / 10000000,
                             shapedData.altitude = field.fIdData.readInt16LE(12)
@@ -85,7 +84,7 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                             }
                             break
                         case (7): 
-                            //Ananlog Data 32bit
+                            //Analog Data 32bit
                             for (let i = 0; i < field.fIdData.length; i++) {
                                 try{
                                     shapedData[`AI${field.fIdData[i]}`] = field.fIdData.readInt32LE(i + 1)
@@ -97,12 +96,14 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                             break
                         default:
                             console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId)
+                            break
                     }
                 })
-                console.log(shapedData);
-                socketDataList[index].arrShapedData.push(shapedData)
+                //console.log(socketDataList[index])
+                socketDataList[index].arrShapedData.push({...shapedData})             
             })
-            response.arrShapedData = [...socketDataList[index].arrShapedData]
+            console.log(socketDataList[index].arrShapedData)
+            response.arrShapedData = socketDataList[index].arrShapedData
         }
     } catch (e) {
         console.error('PayloadDecoderError - unhandled processData Error', e);
