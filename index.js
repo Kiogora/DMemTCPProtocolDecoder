@@ -44,9 +44,10 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                     switch (field.fId) {
                         case (0): 
                             //GPS Data
-                            shapedData.gpsUTCDateTime = Math.floor((timeBase + (field.fIdData.readUInt32LE(0) * 1000))/1000) 
-                            shapedData.latitude = field.fIdData.readInt32LE(4) / 10000000,   //155614102128
-                            shapedData.longitude = field.fIdData.readInt32LE(8) / 10000000,
+                            shapedData.gpsUTCDateTime = Math.floor((timeBase + (field.fIdData.readUInt32LE(0) * 1000))/1000)
+                            shapedData.latitude = field.fIdData.readInt32LE(4) / 10000000
+                            shapedData.longitude = field.fIdData.readInt32LE(8) / 10000000
+                            shapedData.location = `(${shapedData.latitude}, ${shapedData.longitude})`
                             shapedData.altitude = field.fIdData.readInt16LE(12)
                             shapedData.groundSpeed2D = field.fIdData.readUInt16LE(14)
                             shapedData.speedAccuracyEstimate = field.fIdData.readUInt8(16)
