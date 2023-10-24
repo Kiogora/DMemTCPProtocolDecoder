@@ -94,8 +94,12 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                                 i += 4
                             }
                             break
+                        case (15): 
+                            shapedData.DeviceTripType = field.fIdData.readUInt8(0) //1 bytes
+                            shapedData.TripTrimmingAmount = field.fIdData.readInt16LE(4) //2 bytes
+                            break
                         default:
-                            console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId)
+                            console.error('PayloadDecoderError - unhandled splitMultipleRecordsData case fId', field.fId);
                             break
                     }
                 })
