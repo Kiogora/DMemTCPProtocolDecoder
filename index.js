@@ -22,6 +22,8 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
 
         let data = buf
 
+        let response = args
+
         args = { "rtuId": -1, "data": data, "originalData": data,
                 "messageTypeText": {"0x00":"Hello",
                                     "0x04":"Record upload", 
@@ -29,8 +31,6 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
                                     "0x14": "Canned response 1", 
                                     "0x22": "Canned response 2"}
         }
-
-        let response = args
         response.data = data
         response.arrBufAllData = []
 
