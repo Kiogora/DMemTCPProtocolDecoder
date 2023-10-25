@@ -4,8 +4,6 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
     let protocolDecoder = new protocolDecoderClass();
     let index = 0;
     let timeBase = new Date('01/01/2013').getTime()
-    
-    console.log(socketDataList)
 
     if(typeof thisSocket !== 'undefined'){
         /*Step 1 - Check if this socket exists in socketDataList*/
@@ -15,8 +13,8 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
             socketDataList[index].rtuId = -1; 
             socketDataList[index].arrShapedData = []
         }
-        else {
-            throw Error("Cant determine socket data")
+        else{
+            throw Error('Cant find this socket\'s data')
         }
     }
 
