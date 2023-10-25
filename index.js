@@ -4,36 +4,31 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
     let protocolDecoder = new protocolDecoderClass();
     let index = 0;
     let timeBase = new Date('01/01/2013').getTime()
-    
+
+    if(typeof thisSocket !== 'undefined'){
+        /*Step 1 - Check if this socket exists in socketDataList*/
+        index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
+        /*Step 2 - If not present, persist rtuId and all message data*/
+        if (index === -1) {
+            socketDataList[index].rtuId = -1; 
+            socketDataList[index].arrShapedData = []
+        }
+    }
+
+    let data = buf
+
+    args = { "rtuId": -1, "data": data, "originalData": data,
+             "messageTypeText": {"0x00":"Hello",
+                                 "0x04":"Record upload", 
+                                 "0x05":"Commit request", 
+                                 "0x14": "Canned response 1", 
+                                 "0x22": "Canned response 2"}
+    }
+
+    let response = args
+    response.data = data
+    response.arrBufAllData = []
     try {
-
-        if(typeof thisSocket !== 'undefined'){
-            /*Step 1 - Check if this socket exists in socketDataList*/
-            index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
-            /*Step 2 - If not present, persist rtuId and all message data*/
-            if (index !== -1) {
-                socketDataList[index].rtuId = -1; 
-                socketDataList[index].arrShapedData = []
-            } else {
-                console.error('Cant find socket\'s data')
-                throw Error('Cant find socket\'s data')
-            }
-        }
-
-        let data = buf
-
-        let response = args
-
-        args = { "rtuId": -1, "data": data, "originalData": data,
-                "messageTypeText": {"0x00":"Hello",
-                                    "0x04":"Record upload", 
-                                    "0x05":"Commit request", 
-                                    "0x14": "Canned response 1", 
-                                    "0x22": "Canned response 2"}
-        }
-        response.data = data
-        response.arrBufAllData = []
-
         response = await protocolDecoder.splitRawData(response)
         for (let i = 0; i < response.arrBufRawData.length; i++) {
             response.message = response.arrBufRawData[i]
