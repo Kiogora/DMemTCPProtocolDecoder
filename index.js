@@ -4,14 +4,19 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
     let protocolDecoder = new protocolDecoderClass();
     let index = 0;
     let timeBase = new Date('01/01/2013').getTime()
+    
+    console.log(socketDataList)
 
     if(typeof thisSocket !== 'undefined'){
         /*Step 1 - Check if this socket exists in socketDataList*/
         index = socketDataList.findIndex((entry) => { return entry.socket.remoteAddress === thisSocket.remoteAddress && entry.socket.remotePort === thisSocket.remotePort; }) 
         /*Step 2 - If not present, persist rtuId and all message data*/
-        if (index === -1) {
+        if (index !== -1) {
             socketDataList[index].rtuId = -1; 
             socketDataList[index].arrShapedData = []
+        }
+        else {
+            throw Error("Cant determine socket data")
         }
     }
 
