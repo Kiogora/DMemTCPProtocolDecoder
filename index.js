@@ -12,9 +12,9 @@ exports.processData = async function (buf, thisSocket, socketDataList = [{rtuId:
         if (index !== -1) {
             socketDataList[index].rtuId = -1; 
             socketDataList[index].arrShapedData = []
-        }
-        else{
-            throw Error('Cant find this socket\'s data')
+        } else {
+            console.error('Cant find socket\'s data')
+            throw Error('Cant find socket\'s data')
         }
     }
 
